@@ -8,13 +8,14 @@ struct Point{
 impl Point{
     fn random(x_bound: usize, y_bound: usize) -> Point{
         Point{
-            x: rand::thread_rng().gen_range(0..=x_bound),
-            y: rand::thread_rng().gen_range(0..=y_bound),
+            x: rand::thread_rng().gen_range(0..x_bound),
+            y: rand::thread_rng().gen_range(0..y_bound),
         }
     }
 
     fn get_index(self, x_bound: usize) -> usize{
-        return (x_bound-1) * self.y + self.x;
+        //println!("x_bound:{x_bound}, y:{}, x:{}", self.y, self.x);
+        return x_bound * self.y + self.x;
 
     }
 }
@@ -75,7 +76,7 @@ impl Map{
         }
     }
     fn insert_obsticle(&mut self, point: Point, target: Obsticle){
-        self.map[point.get_index(self.width-1)].terr = target;
+        self.map[point.get_index(self.width)].terr = target;
     }
 
     pub fn display_board(self){
@@ -84,15 +85,14 @@ impl Map{
         let player_pos = self.player.get_index(self.width);
 
         for (i,cell) in self.map.iter().enumerate(){
-
-            match i {
-                target_pos => print!("X"),
-                player_pos => print!("C"),
-                _ => print!("{}", cell.as_str()),
-            }
             if i % self.width == 0{
                 println!();
-                
+            }
+
+            match i {
+                _ if target_pos == i => print!("X"),
+                _ if player_pos == i => print!("C"),
+                _ => print!("{}", cell.as_str()),
             }
 
         }
