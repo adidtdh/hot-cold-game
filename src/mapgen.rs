@@ -14,43 +14,105 @@ impl Point{
     }
 
     fn get_index(self, x_bound: usize) -> usize{
-        return x_bound * self.y + self.x;
+        return (x_bound-1) * self.y + self.x;
 
     }
 }
 
-struct Map{
+
+#[derive(Clone)]
+enum Obsticle{
+    PLAIN,
+    ROCK,
+}
+
+impl Obsticle {
+    fn as_str(&self) -> &str {
+        match self {
+            Obsticle::ROCK => "O",
+            Obsticle::PLAIN => " "
+        }
+
+    }
+
+}
+
+#[derive(Clone)]
+struct Cell{
+    terr: Obsticle,
+}
+
+impl Cell {
+    fn new() -> Cell {
+        return Cell{terr:Obsticle::PLAIN};
+    }
+    fn as_str(&self) -> &str {
+        self.terr.as_str()
+    }
+}
+
+pub struct Map{
     width: usize,
     height: usize,
-    map: Vec<bool>,
+    map: Vec<Cell>,
     target: Point,
     player: Point,
 }
 
 impl Map{
-    fn insert_obsticle(&mut self, point: Point, target: bool){
-        self.map[point.get_index(self.width)] = target;
+    fn new(width: usize, height: usize, target: Point, player: Point) -> Map{
+        let mut mapvec = Vec::<Cell>::new();
+
+        for _ in 0..(width*height){
+            mapvec.push(Cell::new());
+        }
+        Map{
+            width,
+            height,
+            map: mapvec,
+            target,
+            player,
+        }
+    }
+    fn insert_obsticle(&mut self, point: Point, target: Obsticle){
+        self.map[point.get_index(self.width-1)].terr = target;
+    }
+
+    pub fn display_board(self){
+
+        let target_pos = self.target.get_index(self.width);
+        let player_pos = self.player.get_index(self.width);
+
+        for (i,cell) in self.map.iter().enumerate(){
+
+            match i {
+                target_pos => print!("X"),
+                player_pos => print!("C"),
+                _ => print!("{}", cell.as_str()),
+            }
+            if i % self.width == 0{
+                println!();
+                
+            }
+
+        }
+
+
     }
 }
 
 
-fn gen_map(width: usize, height: usize) -> Map{
+pub fn gen_map(width: usize, height: usize) -> Map{
 
     let target = Point::random(width, height);
     let player = Point::random(width, height);
 
 
-    let mut map = Map{
-        width,
-        height,
-        map: vec![false; width*height],
-        target,
-        player,
-    };
+    let mut map = Map::new(width, height, target, player);
 
-    for i in 0..(map.width*map.height/20){
+    for _ in 0..(map.width*map.height/20){
         let obs = Point::random(map.width, map.height);
-        map.insert_obsticle(obs, true);
+        map.insert_obsticle(obs, Obsticle::ROCK);
     }
 
     return map;
