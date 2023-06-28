@@ -1,5 +1,6 @@
 use rand::Rng;
 
+
 struct Point{
     x: usize,
     y: usize,
@@ -28,10 +29,10 @@ enum Obsticle{
 }
 
 impl Obsticle {
-    fn as_str(&self) -> &str {
+    fn as_char(&self) -> char {
         match self {
-            Obsticle::ROCK => "O",
-            Obsticle::PLAIN => " "
+            Obsticle::ROCK => 'O',
+            Obsticle::PLAIN => '='
         }
 
     }
@@ -47,8 +48,8 @@ impl Cell {
     fn new() -> Cell {
         return Cell{terr:Obsticle::PLAIN};
     }
-    fn as_str(&self) -> &str {
-        self.terr.as_str()
+    fn as_char(&self) -> char {
+        self.terr.as_char()
     }
 }
 
@@ -79,23 +80,26 @@ impl Map{
         self.map[point.get_index(self.width)].terr = target;
     }
 
-    pub fn display_board(self){
+    pub fn display_board(self) -> String{
 
+        let mut board = String::new();
         let target_pos = self.target.get_index(self.width);
         let player_pos = self.player.get_index(self.width);
 
         for (i,cell) in self.map.iter().enumerate(){
             if i % self.width == 0{
-                println!();
+                board.push('\n')
             }
 
             match i {
-                _ if target_pos == i => print!("X"),
-                _ if player_pos == i => print!("C"),
-                _ => print!("{}", cell.as_str()),
+                _ if target_pos == i => board.push('X'),
+                _ if player_pos == i => board.push('C'),
+                _ => board.push(cell.as_char()),
             }
 
         }
+
+        return board;
 
 
     }
