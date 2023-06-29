@@ -1,12 +1,19 @@
 use rand::Rng;
 
 
+#[derive(Copy, Clone)]
 struct Point{
     x: usize,
     y: usize,
 }
 
 impl Point{
+    fn new(x : usize, y: usize) -> Point{
+        Point{
+            x,
+            y,
+        }
+    }
     fn random(x_bound: usize, y_bound: usize) -> Point{
         Point{
             x: rand::thread_rng().gen_range(0..x_bound),
@@ -53,6 +60,7 @@ impl Cell {
     }
 }
 
+#[derive(Clone)]
 pub struct Map{
     width: usize,
     height: usize,
@@ -80,7 +88,7 @@ impl Map{
         self.map[point.get_index(self.width)].terr = target;
     }
 
-    pub fn display_board(self) -> String{
+    pub fn display_board(&self) -> String{
 
         let mut board = String::new();
         let target_pos = self.target.get_index(self.width);
@@ -101,6 +109,49 @@ impl Map{
 
         return board;
 
+
+    }
+
+    fn desired_target_movement(&self, movement_command: char) -> Point {
+        match movement_command{
+            'w' => Point::new(self.player.x, self.player.y+1),
+            'a' => Point::new(self.player.x-1, self.player.y),
+            's' => Point::new(self.player.x, self.player.y-1),
+            'd' => Point::new(self.player.x+1, self.player.y),
+            _   => Point::new(self.player.x, self.player.y),
+        }
+    }
+
+    fn check_player_movement_legality(&self, movement_target: Point) -> bool{
+        if matches!(self.map[movement_target.get_index(self.width)].terr,Obsticle::PLAIN) {
+            return false;
+        }
+        else if movement_target.x > self.width{
+            return false;
+        }
+        else if movement_target.y > self.height{
+            return false;
+        }
+        else if movement_target.x < 0 {
+            return false;
+        }
+        else if movement_target.y < 0 {
+            return false;
+        }
+        else{
+            return true;
+        }
+
+    }
+
+    pub fn move_player(&mut self, movement_command: char){
+
+        let target_movement = self.desired_target_movement(movement_command);
+        if !self.check_player_movement_legality(target_movement){
+            return;
+        }
+
+        self.player = target_movement;
 
     }
 }
